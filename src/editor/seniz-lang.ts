@@ -1,5 +1,6 @@
 import type { languages } from 'monaco-editor-core';
 
+/* eslint-disable */
 export const conf: languages.LanguageConfiguration = {
     // the default separators except `@$`
     wordPattern: /(-?\d*\.\d\w*)|([^\`\~\!\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,

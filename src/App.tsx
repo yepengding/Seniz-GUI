@@ -1,5 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
+import {connect} from 'react-redux'
+import {getFiles} from './store/action/fileAction'
+
 import {makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -23,16 +26,18 @@ import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 import SenizEditor from "./editor/SenizEditor";
-import Editor from "@monaco-editor/react";
+// import Editor from "@monaco-editor/react";
 
 
-const App = () => {
+const App = (props: any) => {
     const classes = useStyles();
     const editorPaper = clsx(classes.paper, classes.editorHeight);
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
     const [open, setOpen] = React.useState(true);
     const editorValue = React.useRef<any>();
+
+    console.log(props.files);
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -44,6 +49,8 @@ const App = () => {
 
 
     const showEditorValue = () => {
+        props.getFiles();
+        console.log(props.files)
         if (editorValue.current !== undefined) {
             console.log(editorValue.current());
         }
@@ -51,7 +58,7 @@ const App = () => {
 
     return (
         <div className={classes.root}>
-            <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
+            <AppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
                 <Toolbar className={classes.toolbar}>
                     <IconButton
                         edge="start"
@@ -194,6 +201,7 @@ const useStyles = makeStyles((theme) => ({
         ...theme.mixins.toolbar,
     },
     appBar: {
+        position: 'absolute',
         zIndex: theme.zIndex.drawer + 1,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
@@ -268,4 +276,6 @@ const useFileStyles = makeStyles((theme) => ({
     },
 }));
 
-export default App;
+const mapStateToProps  = (state: any) => ({files: state.files})
+
+export default connect(mapStateToProps, {getFiles})(App)

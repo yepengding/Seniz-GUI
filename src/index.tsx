@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import store from './store/store'
+import {Provider} from 'react-redux';
+
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {ThemeProvider} from '@material-ui/core/styles';
 import theme from './theme';
@@ -11,7 +14,9 @@ ReactDOM.render(
     <React.StrictMode>
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <App/>
+            <Provider store={store}>
+                <App />
+            </Provider>
         </ThemeProvider>
     </React.StrictMode>,
     document.getElementById('root')
