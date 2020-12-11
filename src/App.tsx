@@ -19,12 +19,10 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
-// import Editor from "@monaco-editor/react";
 import Viewer from 'react-viewer';
 import {connect} from "react-redux";
 import {compileFile} from "./store/action/compileAction";
 import {SourceFile} from "./store/model";
-
 
 const App = (props: any) => {
     const classes = useStyles();
@@ -139,7 +137,7 @@ const App = (props: any) => {
                         <Grid item xs={12} md={4} lg={3}>
                             <Paper className={editorPaper}>
                                 <div>
-                                    <img src={imageURL} onClick={() => { setVisible(true); }} />
+                                    <img src={imageURL} onClick={() => { setVisible(true); }} alt={'Graph'} />
                                     <Viewer
                                         visible={visible}
                                         onClose={() => { setVisible(false); } }
