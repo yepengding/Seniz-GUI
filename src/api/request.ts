@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const config = {
-    baseURL: 'http://jsonplaceholder.typicode.com/'
+    baseURL: process.env.REACT_APP_WEB_PATH
 }
 
 export default axios.create({

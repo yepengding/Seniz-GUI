@@ -1,16 +1,9 @@
-import React from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import clsx from 'clsx';
-import {connect} from 'react-redux'
-import {getFiles} from './store/action/fileAction'
-
 import {makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -22,11 +15,15 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import CameraIcon from '@material-ui/icons/Camera';
-import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
+import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
 // import Editor from "@monaco-editor/react";
+import Viewer from 'react-viewer';
+import {connect} from "react-redux";
+import {compileFile} from "./store/action/compileAction";
+import {SourceFile} from "./store/model";
 
 
 const App = (props: any) => {
@@ -34,10 +31,34 @@ const App = (props: any) => {
     const editorPaper = clsx(classes.paper, classes.editorHeight);
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
-    const [open, setOpen] = React.useState(true);
-    const editorValue = React.useRef<any>();
+    const [open, setOpen] = useState(true);
+    const editorValue = useRef<any>();
 
-    console.log(props.files);
+    const [visible, setVisible] = useState(false);
+
+    const [imageURL, setImageURL] = useState("");
+
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        if (props.compileInfo.data) {
+            setImageURL(`https://quickchart.io/graphviz?graph=${props.compileInfo.data}`);
+        } else {
+            setImageURL("");
+        }
+        if (props.compileInfo.message) {
+            setMessage(props.compileInfo.message);
+        } else {
+            setMessage("");
+        }
+    }, [props.compileInfo]);
+
+    const currentFile: SourceFile = {
+        id: 1,
+        name: "file 1",
+        size: 100,
+        content: ""
+    }
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -47,13 +68,9 @@ const App = (props: any) => {
         setOpen(false);
     };
 
-
-    const showEditorValue = () => {
-        props.getFiles();
-        console.log(props.files)
-        if (editorValue.current !== undefined) {
-            console.log(editorValue.current());
-        }
+    const visualize = () => {
+        currentFile.content = editorValue.current();
+        props.compileFile(currentFile);
     }
 
     return (
@@ -72,8 +89,8 @@ const App = (props: any) => {
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                         Seniz GUI
                     </Typography>
-                    <IconButton color="inherit" onClick={showEditorValue}>
-                        <CameraIcon />
+                    <IconButton onClick={visualize}>
+                        <CameraIcon/>
                     </IconButton>
                 </Toolbar>
             </AppBar>
@@ -93,14 +110,14 @@ const App = (props: any) => {
                     <IconButton onClick={handleDrawerClose}>
                         <ChevronLeftIcon/>
                     </IconButton>
-
                 </div>
 
                 <Divider/>
 
-                <IconButton color="inherit">
+                <IconButton>
                     <InsertDriveFileIcon/>
                 </IconButton>
+
                 <FileList/>
 
                 <Divider/>
@@ -121,12 +138,20 @@ const App = (props: any) => {
                         {/* Graphic */}
                         <Grid item xs={12} md={4} lg={3}>
                             <Paper className={editorPaper}>
-
+                                <div>
+                                    <img src={imageURL} onClick={() => { setVisible(true); }} />
+                                    <Viewer
+                                        visible={visible}
+                                        onClose={() => { setVisible(false); } }
+                                        images={[{src: imageURL, alt: 'Graph'}]}
+                                    />
+                                </div>
                             </Paper>
                         </Grid>
                         {/* Output */}
                         <Grid item xs={12}>
                             <Paper className={outputPaper}>
+                                {message}
                             </Paper>
                         </Grid>
                     </Grid>
@@ -136,38 +161,6 @@ const App = (props: any) => {
                 </Container>
             </main>
         </div>
-    );
-}
-
-const FileList = () => {
-
-    const classes = useFileStyles();
-
-    function generate(element: any) {
-        // @ts-ignore
-        return [...Array(100).keys()].map((value) =>
-            React.cloneElement(element, {
-                key: value,
-            }),
-        );
-    }
-
-    return (
-        <div>
-            <List dense={true} className={classes.fileList}>
-                {generate(
-                    <ListItem button>
-                        <ListItemIcon>
-                            <FolderIcon/>
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="filename"
-                        />
-                    </ListItem>,
-                )}
-            </List>
-        </div>
-
     );
 }
 
@@ -269,13 +262,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const useFileStyles = makeStyles((theme) => ({
-    fileList: {
-        paddingTop: theme.spacing(4),
-        position: 'absolute'
-    },
-}));
+const mapStateToProps = (state: any) => ({
+    compileInfo: state.compileData.stateData
+});
 
-const mapStateToProps  = (state: any) => ({files: state.files})
-
-export default connect(mapStateToProps, {getFiles})(App)
+export default connect(mapStateToProps, {compileFile})(App)

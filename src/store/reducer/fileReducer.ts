@@ -1,22 +1,25 @@
 import {GET_FILES} from '../actionType'
 
 const initialState = {
-    files: [],
+    stateData: [],
     loading: true
 }
 
-export default function(state = initialState, action: any){
+const fileReducer = (state = initialState, action: any) => {
 
-    switch(action.type){
+    switch (action.type) {
 
         case GET_FILES:
             return {
                 ...state,
-                files: action.payload,
+                stateData: action.payload.data,
                 loading: false
-
             }
-        default: return state
+
+        default:
+            return state
     }
 
 }
+
+export default fileReducer

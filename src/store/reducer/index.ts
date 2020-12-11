@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux'
 import fileReducer from './fileReducer'
+import compileReducer from "./compileReducer";
 
 export default combineReducers({
-    files: fileReducer
+    fileData: fileReducer,
+    compileData: compileReducer
 })
