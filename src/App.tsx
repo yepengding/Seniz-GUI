@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -25,18 +25,17 @@ import {connect} from "react-redux";
 import {compileFile} from "./store/action/compileAction";
 import {SourceFile} from "./store/model";
 
+import {demoCode} from "./data/demo"
+
 const App = (props: any) => {
     const classes = useStyles();
     const editorPaper = clsx(classes.paper, classes.editorHeight);
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
-    const [open, setOpen] = useState(true);
+    const [drawerOpen, setDrawerOpen] = useState(true);
     const [editorValue, setEditorValue] = useState("// write your code here");
-
     const [visible, setVisible] = useState(false);
-
     const [imageURL, setImageURL] = useState("");
-
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -59,55 +58,34 @@ const App = (props: any) => {
         content: ""
     }
 
-    const handleDrawerOpen = () => {
-        setOpen(true);
-    };
-
-    const handleDrawerClose = () => {
-        setOpen(false);
-    };
-
     const visualize = () => {
         currentFile.content = editorValue;
         props.compileFile(currentFile);
     }
 
-    const test = () => {
-        setEditorValue("// Demo code\n" +
-            "system TS over Vars {\n" +
-            "    init s0 -> [a1] s1\n" +
-            "\n" +
-            "    s0 = {\n" +
-            "        v: 0\n" +
-            "    }\n" +
-            "    \n" +
-            "    s1 = {\n" +
-            "        v: 1\n" +
-            "    }\n" +
-            "}\n" +
-            "\n" +
-            "variable Vars {\n" +
-            "    v :: int\n" +
-            "}");
+    const loadDemoCode = () => {
+        setEditorValue(demoCode);
     }
 
     return (
         <div className={classes.root}>
-            <AppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
+            <AppBar className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}>
                 <Toolbar className={classes.toolbar}>
                     <IconButton
                         edge="start"
                         color="inherit"
                         aria-label="open drawer"
-                        onClick={handleDrawerOpen}
-                        className={clsx(classes.menuButton, {[classes.menuButtonHidden]: open})}
+                        onClick={() => {
+                            setDrawerOpen(true)
+                        }}
+                        className={clsx(classes.menuButton, {[classes.menuButtonHidden]: drawerOpen})}
                     >
                         <MenuIcon/>
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                         Seniz GUI
                     </Typography>
-                    <IconButton onClick={test}>
+                    <IconButton onClick={loadDemoCode}>
                         <HourglassEmptyIcon/>
                     </IconButton>
                     <IconButton onClick={visualize}>
@@ -118,17 +96,19 @@ const App = (props: any) => {
             <Drawer
                 variant="permanent"
                 classes={{
-                    paper: clsx(classes.drawerPaper, {[classes.drawerPaperClose]: !open}),
+                    paper: clsx(classes.drawerPaper, {[classes.drawerPaperClose]: !drawerOpen}),
                 }}
-                open={open}
+                open={drawerOpen}
             >
                 <div className={classes.toolbarIcon}>
-                    {/*<Typography component="h1" variant="h5" color="inherit" noWrap className={classes.title}>*/}
-                    {/*    <Link color="inherit" href="https://www-sato.cc.u-tokyo.ac.jp/DING.Yepeng/">*/}
-                    {/*        Seniz GUI*/}
-                    {/*    </Link>*/}
-                    {/*</Typography>*/}
-                    <IconButton onClick={handleDrawerClose}>
+                    <Typography component="h1" variant="h5" color="inherit" noWrap className={classes.title}>
+                        <Link color="inherit" href="https://github.com/yepengding/Seniz" target={"_blank"}>
+                            Seniz
+                        </Link>
+                    </Typography>
+                    <IconButton onClick={() => {
+                        setDrawerOpen(false)
+                    }}>
                         <ChevronLeftIcon/>
                     </IconButton>
                 </div>
@@ -146,7 +126,7 @@ const App = (props: any) => {
             </Drawer>
             <main className={classes.content}>
                 <div className={classes.appBarSpacer}/>
-                <Container maxWidth="lg" className={classes.container}>
+                <Container maxWidth="xl" className={classes.container}>
                     <Grid container spacing={3}>
                         {/* Editor */}
                         <Grid item xs={12} md={8} lg={9}>
@@ -195,7 +175,7 @@ const Copyright = () => {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
-            <Link color="inherit" href="https://www-sato.cc.u-tokyo.ac.jp/DING.Yepeng/">
+            <Link color="inherit" href="https://yepengding.github.io/" target={"_blank"}>
                 Yepeng Ding
             </Link>{' '}
             {new Date().getFullYear()}

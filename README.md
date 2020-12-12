@@ -1,5 +1,6 @@
 # Seniz GUI
-Seniz GUI provides a graphical user interface for [Seniz](https://github.com/yepengding/Seniz).
+Seniz GUI provides a graphical user interface for [Seniz](https://github.com/yepengding/Seniz). \
+This project is supported by [Seniz Web](https://github.com/yepengding/Seniz-Web).
 
 ## Available Scripts
 

@@ -39,12 +39,6 @@ monaco
     );
 
 const SenizEditor = (props: any) => {
-    const valueGetter = props.forwardedRef;
-
-    const handleEditorDidMount = (_valueGetter: any) => {
-        valueGetter.current = _valueGetter;
-    }
-
     const handleEditorChange = (ev: any, value: any) => {
         props.setValue(value);
     };
