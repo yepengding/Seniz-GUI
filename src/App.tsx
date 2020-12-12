@@ -16,6 +16,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import CameraIcon from '@material-ui/icons/Camera';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
 
 import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
@@ -30,7 +31,7 @@ const App = (props: any) => {
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
     const [open, setOpen] = useState(true);
-    const editorValue = useRef<any>();
+    const [editorValue, setEditorValue] = useState("// write your code here");
 
     const [visible, setVisible] = useState(false);
 
@@ -67,8 +68,27 @@ const App = (props: any) => {
     };
 
     const visualize = () => {
-        currentFile.content = editorValue.current();
+        currentFile.content = editorValue;
         props.compileFile(currentFile);
+    }
+
+    const test = () => {
+        setEditorValue("// Demo code\n" +
+            "system TS over Vars {\n" +
+            "    init s0 -> [a1] s1\n" +
+            "\n" +
+            "    s0 = {\n" +
+            "        v: 0\n" +
+            "    }\n" +
+            "    \n" +
+            "    s1 = {\n" +
+            "        v: 1\n" +
+            "    }\n" +
+            "}\n" +
+            "\n" +
+            "variable Vars {\n" +
+            "    v :: int\n" +
+            "}");
     }
 
     return (
@@ -87,6 +107,9 @@ const App = (props: any) => {
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                         Seniz GUI
                     </Typography>
+                    <IconButton onClick={test}>
+                        <HourglassEmptyIcon/>
+                    </IconButton>
                     <IconButton onClick={visualize}>
                         <CameraIcon/>
                     </IconButton>
@@ -130,6 +153,8 @@ const App = (props: any) => {
                             <Paper className={editorPaper}>
                                 <SenizEditor
                                     forwardedRef={editorValue}
+                                    value={editorValue}
+                                    setValue={setEditorValue}
                                 />
                             </Paper>
                         </Grid>
@@ -137,10 +162,14 @@ const App = (props: any) => {
                         <Grid item xs={12} md={4} lg={3}>
                             <Paper className={editorPaper}>
                                 <div>
-                                    <img src={imageURL} onClick={() => { setVisible(true); }} alt={'Graph'} />
+                                    <img src={imageURL} onClick={() => {
+                                        setVisible(true);
+                                    }} alt={'Graph'}/>
                                     <Viewer
                                         visible={visible}
-                                        onClose={() => { setVisible(false); } }
+                                        onClose={() => {
+                                            setVisible(false);
+                                        }}
                                         images={[{src: imageURL, alt: 'Graph'}]}
                                     />
                                 </div>

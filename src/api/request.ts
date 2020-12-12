@@ -5,5 +5,7 @@ const config = {
 }
 
 export default axios.create({
-    baseURL: config.baseURL
+    baseURL: config.baseURL,
+    withCredentials: true,
+    timeout: 10000
 });
