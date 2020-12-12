@@ -12,6 +12,7 @@ const FileList = (props: any) => {
 
     useEffect(() => {
         props.getFiles();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const fileList = (
@@ -38,7 +39,8 @@ const FileList = (props: any) => {
 }
 
 const mapStateToProps = (state: any) => ({
-    files: state.fileData.stateData
+    files: state.fileData.stateData,
+    loading: state.fileData.loading
 });
 
 export default connect(mapStateToProps, {getFiles})(FileList)

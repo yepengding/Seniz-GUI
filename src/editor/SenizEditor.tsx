@@ -1,5 +1,4 @@
 import {monaco} from "@monaco-editor/react";
-import Editor from "@monaco-editor/react";
 import {ControlledEditor} from "@monaco-editor/react";
 
 import React from "react";
