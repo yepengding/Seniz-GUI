@@ -20,12 +20,14 @@ import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
 
 import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
-import Viewer from 'react-viewer';
 import {connect} from "react-redux";
 import {compileFile} from "./store/action/compileAction";
 import {SourceFile} from "./store/model";
 
+import {defaultPreview} from "./data/default";
 import {demoCode} from "./data/demo"
+
+import SenizViewer from "./preview/SenizViewer";
 
 const App = (props: any) => {
     const classes = useStyles();
@@ -34,21 +36,22 @@ const App = (props: any) => {
 
     const [drawerOpen, setDrawerOpen] = useState(true);
     const [editorValue, setEditorValue] = useState("// write your code here");
-    const [visible, setVisible] = useState(false);
-    const [imageURL, setImageURL] = useState("");
     const [message, setMessage] = useState("");
+    const [previewValue, setPreviewValue] = useState(defaultPreview);
+
 
     useEffect(() => {
         if (props.compileInfo.data) {
-            setImageURL(`https://quickchart.io/graphviz?graph=${props.compileInfo.data}`);
+            setPreviewValue(props.compileInfo.data);
         } else {
-            setImageURL("");
+            setPreviewValue(defaultPreview);
         }
         if (props.compileInfo.message) {
             setMessage(props.compileInfo.message);
         } else {
             setMessage("");
         }
+
     }, [props.compileInfo]);
 
     const currentFile: SourceFile = {
@@ -141,18 +144,7 @@ const App = (props: any) => {
                         {/* Graphic */}
                         <Grid item xs={12} md={4} lg={3}>
                             <Paper className={editorPaper}>
-                                <div>
-                                    <img src={imageURL} onClick={() => {
-                                        setVisible(true);
-                                    }} alt={'Graph'}/>
-                                    <Viewer
-                                        visible={visible}
-                                        onClose={() => {
-                                            setVisible(false);
-                                        }}
-                                        images={[{src: imageURL, alt: 'Graph'}]}
-                                    />
-                                </div>
+                                <SenizViewer preview={previewValue} />
                             </Paper>
                         </Grid>
                         {/* Output */}
