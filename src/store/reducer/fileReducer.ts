@@ -1,7 +1,11 @@
-import {GET_FILES} from '../actionType'
+import {CREATE_FILE, DELETE_FILE, FILE_ERROR, GET_FILE, GET_FILES, UPDATE_FILE} from '../actionType'
 
 const initialState = {
-    stateData: [],
+    currentFile: {
+
+    },
+    fileList: [],
+    message: null,
     loading: true
 }
 
@@ -12,8 +16,22 @@ const fileReducer = (state = initialState, action: any) => {
         case GET_FILES:
             return {
                 ...state,
-                stateData: action.payload.data,
+                fileList: action.payload.data,
                 loading: false
+            }
+        case GET_FILE:
+        case UPDATE_FILE:
+        case CREATE_FILE:
+            return {
+                ...state,
+                currentFile: action.payload.data,
+                loading: false
+            }
+        case DELETE_FILE:
+        case FILE_ERROR:
+            return {
+                ...state,
+                message: action.payload
             }
 
         default:

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -15,19 +15,33 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import CameraIcon from '@material-ui/icons/Camera';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
+import SaveIcon from '@material-ui/icons/Save';
+
 
 import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
 import {connect} from "react-redux";
 import {compileFile} from "./store/action/compileAction";
-import {SourceFile} from "./store/model";
+import {ProjectFile} from "./store/model";
 
 import {defaultPreview} from "./data/default";
-import {demoCode} from "./data/demo"
 
 import SenizViewer from "./preview/SenizViewer";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Snackbar,
+    TextField
+} from "@material-ui/core";
+import {createFile, getFile, getFileList, updateFile} from "./store/action/fileAction";
+import {closeSnackbar, openSnackbar} from "./store/action/appAction";
+import {demoCode} from "./data/demo";
 
 const App = (props: any) => {
     const classes = useStyles();
@@ -35,10 +49,20 @@ const App = (props: any) => {
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
     const [drawerOpen, setDrawerOpen] = useState(true);
-    const [editorValue, setEditorValue] = useState("// write your code here");
+    const [createFileOpen, setCreateFileOpen] = useState(false);
+    const [disableCreateFileBtn, setDisableCreateFileBtn] = useState(true);
+    const [editorValue, setEditorValue] = useState("");
     const [message, setMessage] = useState("");
     const [previewValue, setPreviewValue] = useState(defaultPreview);
 
+    const filenameRef = useRef<any>("");
+
+    useEffect(() => {
+        if (props.fileMsg !== null) {
+            props.openSnackbar(props.fileMsg);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.fileMsg])
 
     useEffect(() => {
         if (props.compileInfo.data) {
@@ -54,20 +78,40 @@ const App = (props: any) => {
 
     }, [props.compileInfo]);
 
-    const currentFile: SourceFile = {
-        id: 1,
-        name: "file 1",
-        size: 100,
-        content: ""
-    }
+    useEffect(() => {
+        if (props.currentFile.id !== undefined) {
+            setEditorValue(props.currentFile.content);
+            props.getFileList();
+        } else {
+            setEditorValue("// Write your test code here.")
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.currentFile.id])
 
     const visualize = () => {
-        currentFile.content = editorValue;
-        props.compileFile(currentFile);
+        props.currentFile.content = editorValue;
+        props.compileFile(props.currentFile);
     }
 
     const loadDemoCode = () => {
         setEditorValue(demoCode);
+    }
+
+    const createFile = () => {
+        const newFile: ProjectFile = {
+            name: filenameRef.current.value,
+            content: "",
+            projectId: 1
+        };
+        props.createFile(newFile);
+        setCreateFileOpen(false);
+        setDisableCreateFileBtn(true);
+    }
+
+    const saveFile = () => {
+        props.currentFile.content = editorValue;
+        props.updateFile(props.currentFile);
     }
 
     return (
@@ -118,9 +162,16 @@ const App = (props: any) => {
 
                 <Divider/>
 
-                <IconButton>
-                    <InsertDriveFileIcon/>
-                </IconButton>
+                <Box m={1}>
+                    <IconButton onClick={() => {
+                        setCreateFileOpen(true)
+                    }}>
+                        <NoteAddIcon/>
+                    </IconButton>
+                    <IconButton onClick={saveFile}>
+                        <SaveIcon/>
+                    </IconButton>
+                </Box>
 
                 <FileList/>
 
@@ -144,7 +195,7 @@ const App = (props: any) => {
                         {/* Graphic */}
                         <Grid item xs={12} md={4} lg={3}>
                             <Paper className={editorPaper}>
-                                <SenizViewer preview={previewValue} />
+                                <SenizViewer preview={previewValue}/>
                             </Paper>
                         </Grid>
                         {/* Output */}
@@ -159,6 +210,52 @@ const App = (props: any) => {
                     </Box>
                 </Container>
             </main>
+
+            {/* Create file dialog */}
+            <Dialog open={createFileOpen} onClose={() => {
+                setCreateFileOpen(false);
+                setDisableCreateFileBtn(true);
+            }} aria-labelledby="create-file-dialog">
+                <DialogTitle id="form-dialog-title">Create new file</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Please input file name:
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        required
+                        margin="dense"
+                        label="File name"
+                        fullWidth
+                        inputRef={filenameRef}
+                        onChange={(e) => {
+                            setDisableCreateFileBtn(e.target.value.length === 0)
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setCreateFileOpen(false);
+                        setDisableCreateFileBtn(true);
+                    }} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={createFile} color="secondary" disabled={disableCreateFileBtn}>
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/*  Snackbar  */}
+            <Snackbar open={props.snackbar.open}
+                      anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right',
+                      }}
+                      autoHideDuration={5000}
+                      message={props.snackbar.message}
+                      onClose={props.closeSnackbar}
+            />
         </div>
     );
 }
@@ -262,7 +359,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const mapStateToProps = (state: any) => ({
+    snackbar: state.appData.snackbar,
+    currentFile: state.fileData.currentFile,
+    fileList: state.fileData.fileList,
+    fileMsg: state.fileData.message,
     compileInfo: state.compileData.stateData
 });
 
-export default connect(mapStateToProps, {compileFile})(App)
+export default connect(mapStateToProps, {
+    openSnackbar,
+    closeSnackbar,
+    createFile,
+    updateFile,
+    getFile,
+    getFileList,
+    compileFile
+})(App)

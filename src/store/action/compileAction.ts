@@ -1,8 +1,8 @@
 import {COMPILE_FILE, COMPILE_FILE_ERROR} from '../actionType'
 import request from '../../api/request'
-import {SourceFile} from "../model";
+import {ProjectFile} from "../model";
 
-export const compileFile = (file: SourceFile) => async (dispatch: any) => {
+export const compileFile = (file: ProjectFile) => async (dispatch: any) => {
 
     try {
         const res = await request.post('compile/' + file.id, file)
