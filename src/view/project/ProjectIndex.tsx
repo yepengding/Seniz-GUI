@@ -1,9 +1,9 @@
 import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from "@material-ui/core";
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import IconButton from "@material-ui/core/IconButton";
 import LibraryAddIcon from "@material-ui/icons/LibraryAdd";
 import {connect} from "react-redux";
-import {createProject} from "../../store/action/projectAction";
+import {createProject, getProjectList} from "../../store/action/projectAction";
 import ProjectList from "./ProjectList";
 import {Project} from "../../store/model";
 
@@ -12,8 +12,21 @@ const ProjectIndex = (props: any) => {
     const [createOpen, setCreateOpen] = useState(false);
     const [disableCreateBtn, setDisableCreateBtn] = useState(true);
 
+    const [selectValue, setSelectValue] = useState('');
+
     const nameRef = useRef<any>("");
     const descRef = useRef<any>("");
+
+    // Update current project
+    useEffect(() => {
+        if (props.currentProject.id !== undefined) {
+            props.getProjectList().then(()=>{
+                setSelectValue(props.currentProject.id);
+            });
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.currentProject.id])
 
     const createProject = () => {
         const newProject: Project = {
@@ -28,7 +41,7 @@ const ProjectIndex = (props: any) => {
     return (
     <Box>
         {/* Project List */}
-        <ProjectList/>
+        <ProjectList value={selectValue}/>
 
         {/* Create project */}
         <IconButton onClick={() => {setCreateOpen(true)}}>
@@ -52,14 +65,10 @@ const ProjectIndex = (props: any) => {
                     }}
                 />
                 <TextField
-                    required
                     margin="dense"
                     label="Project description"
                     fullWidth
                     inputRef={descRef}
-                    onChange={(e) => {
-                        setDisableCreateBtn(e.target.value.length === 0)
-                    }}
                 />
             </DialogContent>
             <DialogActions>
@@ -79,6 +88,8 @@ const ProjectIndex = (props: any) => {
 
 }
 
-const mapStateToProps = (state: any) => ({});
+const mapStateToProps = (state: any) => ({
+    currentProject: state.projectData.currentProject
+});
 
-export default connect(mapStateToProps, {createProject})(ProjectIndex)
+export default connect(mapStateToProps, {createProject, getProjectList})(ProjectIndex)

@@ -4,16 +4,19 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import {connect} from "react-redux";
-import {deleteFile, getFile, getFileList} from "../../store/action/fileAction";
+import {deleteFile, getFile} from "../../store/action/fileAction";
 import {ProjectFile} from "../../store/model";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from "@material-ui/core/IconButton";
+import {getProjectFileList} from "../../store/action/projectAction";
 
 const FileList = (props: any) => {
 
     useEffect(() => {
-        props.getFileList();
+        if (props.currentProject.id !== undefined) {
+            props.getProjectFileList();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -25,13 +28,15 @@ const FileList = (props: any) => {
         if (fileId != null) {
             props.deleteFile(fileId);
         }
-        props.getFileList();
+        props.getProjectFileList();
     }
 
     const fileList = (
         <List dense={true}>
             {props.fileList.map((file: ProjectFile) =>
-                <ListItem button={true} onClick={() => {loadFile(file.id)}} key={file.id} >
+                <ListItem button={true} onClick={() => {
+                    loadFile(file.id)
+                }} key={file.id}>
                     <ListItemIcon>
                         <InsertDriveFileIcon/>
                     </ListItemIcon>
@@ -55,8 +60,9 @@ const FileList = (props: any) => {
 }
 
 const mapStateToProps = (state: any) => ({
-    fileList: state.fileData.fileList,
+    currentProject: state.projectData.currentProject,
+    fileList: state.projectData.fileList,
     loading: state.fileData.loading
 });
 
-export default connect(mapStateToProps, {getFile, deleteFile, getFileList})(FileList)
+export default connect(mapStateToProps, {getFile, deleteFile, getProjectFileList})(FileList)

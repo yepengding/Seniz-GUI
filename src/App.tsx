@@ -24,13 +24,13 @@ import {defaultPreview} from "./data/default";
 
 import SenizViewer from "./preview/SenizViewer";
 import {Snackbar} from "@material-ui/core";
-import {createFile, getFile, getFileList, updateFile} from "./store/action/fileAction";
+import {createFile, getFile, updateFile} from "./store/action/fileAction";
 import {closeSnackbar, openSnackbar} from "./store/action/appAction";
 import {demoCode} from "./data/demo";
 import Copyright from "./view/CopyRight";
 import FileOperation from "./view/projec-file/FileIndex";
 import ProjectOperation from "./view/project/ProjectIndex";
-import {getProjectList} from "./store/action/projectAction";
+import {getProjectFileList, getProjectList} from "./store/action/projectAction";
 
 const App = (props: any) => {
     const classes = useStyles();
@@ -65,20 +65,13 @@ const App = (props: any) => {
 
     }, [props.compileInfo]);
 
-    // Update current project
-    useEffect(() => {
-        if (props.currentProject.id !== undefined) {
-            props.getProjectList();
-        }
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.currentProject.id])
 
     // Update current file
     useEffect(() => {
         if (props.currentFile.id !== undefined) {
             setEditorValue(props.currentFile.content);
-            props.getFileList();
+            props.getProjectFileList(props.currentProject.id);
         } else {
             setEditorValue("// Write your test code here.")
         }
@@ -302,7 +295,6 @@ const mapStateToProps = (state: any) => ({
     snackbar: state.appData.snackbar,
     currentProject: state.projectData.currentProject,
     currentFile: state.fileData.currentFile,
-    fileList: state.fileData.fileList,
     fileMsg: state.fileData.message,
     compileInfo: state.compileData.stateData
 });
@@ -314,6 +306,6 @@ export default connect(mapStateToProps, {
     createFile,
     updateFile,
     getFile,
-    getFileList,
+    getProjectFileList,
     compileFile
 })(App)

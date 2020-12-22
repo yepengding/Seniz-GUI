@@ -1,8 +1,8 @@
 import {connect} from "react-redux";
 import {FormControl, MenuItem, Select} from "@material-ui/core";
-import React, {useEffect} from "react";
+import React, {ChangeEvent, useEffect} from "react";
 import {makeStyles} from "@material-ui/core/styles";
-import {getProjectList} from "../../store/action/projectAction";
+import {getProject, getProjectFileList, getProjectList} from "../../store/action/projectAction";
 import {Project} from "../../store/model";
 
 const ProjectList = (props: any) => {
@@ -14,14 +14,21 @@ const ProjectList = (props: any) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const projectChange = (event: ChangeEvent<{ value: unknown }>) => {
+        const id = event.target.value as number;
+        props.getProject(id);
+        props.getProjectFileList(id);
+    }
+
     return (
         <FormControl className={classes.projectSelect}>
             <Select
-                // value={age}
-                // onChange={handleChange}
+                defaultValue={''}
+                value={props.value}
+                onChange={projectChange}
             >
                 {props.projectList.map((project: Project) =>
-                    <MenuItem value={project.id}>{project.name}</MenuItem>
+                    <MenuItem value={project.id} key={project.id}>{project.name}</MenuItem>
                 )}
 
             </Select>
@@ -42,4 +49,4 @@ const mapStateToProps = (state: any) => ({
     projectList: state.projectData.projectList,
 });
 
-export default connect(mapStateToProps, {getProjectList})(ProjectList)
+export default connect(mapStateToProps, {getProject, getProjectList, getProjectFileList})(ProjectList)

@@ -21,7 +21,7 @@ const FileIndex = (props: any) => {
         const newFile: ProjectFile = {
             name: filenameRef.current.value,
             content: "",
-            projectId: 1
+            projectId: props.currentProject.id as number
         };
         props.createFile(newFile);
         setCreateFileOpen(false);
@@ -38,7 +38,7 @@ const FileIndex = (props: any) => {
             <Box m={1}>
                 <IconButton onClick={() => {
                     setCreateFileOpen(true)
-                }}>
+                }} disabled={props.currentProject.id === undefined}>
                     <NoteAddIcon/>
                 </IconButton>
                 <IconButton onClick={saveFile} disabled={props.currentFile.id === undefined}>
@@ -87,6 +87,7 @@ const FileIndex = (props: any) => {
 
 const mapStateToProps = (state: any) => ({
     currentFile: state.fileData.currentFile,
+    currentProject: state.projectData.currentProject
 });
 
 export default connect(mapStateToProps, {createFile, updateFile})(FileIndex)
