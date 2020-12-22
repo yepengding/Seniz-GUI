@@ -2,6 +2,11 @@
 export const OPEN_SNACKBAR = 'OPEN_SNACKBAR';
 export const CLOSE_SNACKBAR = 'CLOSE_SNACKBAR';
 
+// Project API
+export const CREATE_PROJECT = 'CREATE_PROJECT';
+export const GET_PROJECTS = 'GET_PROJECTS';
+export const PROJECT_ERROR = 'PROJECT_ERROR';
+
 // File API
 export const GET_FILE = 'GET_FILE';
 export const CREATE_FILE = 'CREATE_FILE'

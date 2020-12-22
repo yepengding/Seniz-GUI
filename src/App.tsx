@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import clsx from 'clsx';
 import {makeStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -15,33 +15,22 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import CameraIcon from '@material-ui/icons/Camera';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import HourglassEmptyIcon from '@material-ui/icons/HourglassEmpty';
-import SaveIcon from '@material-ui/icons/Save';
-
-
-import FileList from "./FileList";
 import SenizEditor from "./editor/SenizEditor";
 import {connect} from "react-redux";
 import {compileFile} from "./store/action/compileAction";
-import {ProjectFile} from "./store/model";
 
 import {defaultPreview} from "./data/default";
 
 import SenizViewer from "./preview/SenizViewer";
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Snackbar,
-    TextField
-} from "@material-ui/core";
+import {Snackbar} from "@material-ui/core";
 import {createFile, getFile, getFileList, updateFile} from "./store/action/fileAction";
 import {closeSnackbar, openSnackbar} from "./store/action/appAction";
 import {demoCode} from "./data/demo";
+import Copyright from "./view/CopyRight";
+import FileOperation from "./view/projec-file/FileIndex";
+import ProjectOperation from "./view/project/ProjectIndex";
+import {getProjectList} from "./store/action/projectAction";
 
 const App = (props: any) => {
     const classes = useStyles();
@@ -49,13 +38,11 @@ const App = (props: any) => {
     const outputPaper = clsx(classes.paper, classes.outputHeight);
 
     const [drawerOpen, setDrawerOpen] = useState(true);
-    const [createFileOpen, setCreateFileOpen] = useState(false);
-    const [disableCreateFileBtn, setDisableCreateFileBtn] = useState(true);
     const [editorValue, setEditorValue] = useState("");
     const [message, setMessage] = useState("");
     const [previewValue, setPreviewValue] = useState(defaultPreview);
 
-    const filenameRef = useRef<any>("");
+    // const filenameRef = useRef<any>("");
 
     useEffect(() => {
         if (props.fileMsg !== null) {
@@ -78,6 +65,16 @@ const App = (props: any) => {
 
     }, [props.compileInfo]);
 
+    // Update current project
+    useEffect(() => {
+        if (props.currentProject.id !== undefined) {
+            props.getProjectList();
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.currentProject.id])
+
+    // Update current file
     useEffect(() => {
         if (props.currentFile.id !== undefined) {
             setEditorValue(props.currentFile.content);
@@ -98,24 +95,9 @@ const App = (props: any) => {
         setEditorValue(demoCode);
     }
 
-    const createFile = () => {
-        const newFile: ProjectFile = {
-            name: filenameRef.current.value,
-            content: "",
-            projectId: 1
-        };
-        props.createFile(newFile);
-        setCreateFileOpen(false);
-        setDisableCreateFileBtn(true);
-    }
-
-    const saveFile = () => {
-        props.currentFile.content = editorValue;
-        props.updateFile(props.currentFile);
-    }
-
     return (
         <div className={classes.root}>
+            {/* App Bar */}
             <AppBar className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}>
                 <Toolbar className={classes.toolbar}>
                     <IconButton
@@ -129,17 +111,27 @@ const App = (props: any) => {
                     >
                         <MenuIcon/>
                     </IconButton>
-                    <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-                        Seniz GUI
-                    </Typography>
-                    <IconButton onClick={loadDemoCode}>
-                        <HourglassEmptyIcon/>
-                    </IconButton>
-                    <IconButton onClick={visualize}>
-                        <CameraIcon/>
-                    </IconButton>
+                    <Grid container justify="space-between">
+                        <Grid item>
+
+                            <ProjectOperation/>
+                        </Grid>
+
+                        <Grid item>
+                            <IconButton onClick={loadDemoCode}>
+                                <HourglassEmptyIcon/>
+                            </IconButton>
+                            <IconButton onClick={visualize}>
+                                <CameraIcon/>
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+
+
                 </Toolbar>
             </AppBar>
+
+            {/* Drawer */}
             <Drawer
                 variant="permanent"
                 classes={{
@@ -162,18 +154,9 @@ const App = (props: any) => {
 
                 <Divider/>
 
-                <Box m={1}>
-                    <IconButton onClick={() => {
-                        setCreateFileOpen(true)
-                    }}>
-                        <NoteAddIcon/>
-                    </IconButton>
-                    <IconButton onClick={saveFile}>
-                        <SaveIcon/>
-                    </IconButton>
-                </Box>
+                {/* File operation and list */}
+                <FileOperation content={editorValue}/>
 
-                <FileList/>
 
                 <Divider/>
                 {/*<List>{secondaryListItems}</List>*/}
@@ -211,41 +194,6 @@ const App = (props: any) => {
                 </Container>
             </main>
 
-            {/* Create file dialog */}
-            <Dialog open={createFileOpen} onClose={() => {
-                setCreateFileOpen(false);
-                setDisableCreateFileBtn(true);
-            }} aria-labelledby="create-file-dialog">
-                <DialogTitle id="form-dialog-title">Create new file</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Please input file name:
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        required
-                        margin="dense"
-                        label="File name"
-                        fullWidth
-                        inputRef={filenameRef}
-                        onChange={(e) => {
-                            setDisableCreateFileBtn(e.target.value.length === 0)
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => {
-                        setCreateFileOpen(false);
-                        setDisableCreateFileBtn(true);
-                    }} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={createFile} color="secondary" disabled={disableCreateFileBtn}>
-                        Create
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
             {/*  Snackbar  */}
             <Snackbar open={props.snackbar.open}
                       anchorOrigin={{
@@ -260,18 +208,6 @@ const App = (props: any) => {
     );
 }
 
-const Copyright = () => {
-    return (
-        <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://yepengding.github.io/" target={"_blank"}>
-                Yepeng Ding
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
 
 const drawerWidth = 240;
 
@@ -313,6 +249,10 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         flexGrow: 1,
+    },
+    projectSelect: {
+        margin: theme.spacing(1),
+        minWidth: 120,
     },
     drawerPaper: {
         position: 'relative',
@@ -360,6 +300,7 @@ const useStyles = makeStyles((theme) => ({
 
 const mapStateToProps = (state: any) => ({
     snackbar: state.appData.snackbar,
+    currentProject: state.projectData.currentProject,
     currentFile: state.fileData.currentFile,
     fileList: state.fileData.fileList,
     fileMsg: state.fileData.message,
@@ -369,6 +310,7 @@ const mapStateToProps = (state: any) => ({
 export default connect(mapStateToProps, {
     openSnackbar,
     closeSnackbar,
+    getProjectList,
     createFile,
     updateFile,
     getFile,

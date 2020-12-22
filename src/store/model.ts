@@ -5,3 +5,9 @@ export interface ProjectFile {
     content: string,
     projectId: number
 }
+
+export interface Project {
+    id?: number,
+    name: string,
+    description: string
+}
