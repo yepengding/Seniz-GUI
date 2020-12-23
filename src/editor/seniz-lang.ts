@@ -43,8 +43,10 @@ export const language = <languages.IMonarchLanguage>{
     keywords: [
         'system',
         'over',
+        'main',
         'control',
         'varset',
+        'as',
         'init',
         'string',
         'assert',
@@ -62,11 +64,17 @@ export const language = <languages.IMonarchLanguage>{
         'const',
         'float',
         'true',
-        'false'
+        'false',
+        'ltl',
+        'always',
+        'eventually',
+        'next',
+        'until'
     ],
 
     operators: [
         '->',
+        '|||',
         '=',
         '>',
         '<',
